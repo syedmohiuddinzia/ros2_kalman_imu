@@ -1,120 +1,184 @@
 # ros2_kalman_imu
 Implementation of Kalman Filter on MPU9250 IMU Linear Acceleration and Angular Velocity Data using ROS2
 
-# 📚 Mathematics Behind 3D Kalman Filter
+## 1. Introduction
 
-## 1. Definitions
+The **Kalman Filter** is an algorithm that estimates the true state of a system from noisy sensor measurements.  
+It is **predictive** (it guesses ahead) and **corrective** (it fixes guesses based on new data).
 
-We are filtering a 3D state:
+You can think of it like:
+- **Prediction**: "I think the position will be here based on physics."
+- **Correction**: "Hmm, the sensor says I’m a little off, let’s adjust."
 
-- **State vector** ($\mathbf{x}$):
+## 2. Why Kalman Filter?
 
-$$
-\mathbf{x} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}
-$$
+In real-world systems like an **IMU (Inertial Measurement Unit)**, sensors measure:
+- **Angular velocity** (rotation rate, e.g., °/s)
+- **Linear acceleration** (change in speed, e.g., m/s²)
 
-- **Measurement vector** ($\mathbf{z}$):
+Both are noisy!
 
-$$
-\mathbf{z} = \begin{bmatrix} z_x \\ z_y \\ z_z \end{bmatrix}
-$$
+Kalman Filter **smooths** these measurements to give a **better estimate** of the true motion.
 
-- **State covariance** ($\mathbf{P}$) (3×3 matrix):  
-  Represents the uncertainty in the estimate.
+## 3. The Basic Idea
 
-- **Process noise covariance** ($\mathbf{Q}$) (3×3 matrix):  
-  Represents system disturbances.
+At every time step:
+1. **Predict** where the system should be.
+2. **Update** this prediction based on actual measurement.
 
-- **Measurement noise covariance** ($\mathbf{R}$) (3×3 matrix):  
-  Represents sensor noise.
+This two-step cycle keeps running as data comes in.
 
-- **Transition matrix** ($\mathbf{A}$) and **Observation matrix** ($\mathbf{H}$):  
-  Here both are identity matrices ($\mathbf{I}_3$).
+## 4. Mathematical Foundation
 
-## 2. Kalman Filter Steps
+We work with:
+- **State vector**: what we are tracking (e.g., velocity, position)
+- **Measurement**: what sensors tell us (noisy)
+- **Matrices** that describe motion and noise.
 
-### (A) Prediction Step
+### Key Variables
+| Symbol | Meaning |
+|:------:|:--------|
+| x      | State (e.g., velocity, position) |
+| P      | State uncertainty (covariance) |
+| u      | Control input (e.g., acceleration) |
+| z      | Measurement (sensor data) |
+| F      | State transition model |
+| H      | Measurement model |
+| Q      | Process noise covariance |
+| R      | Measurement noise covariance |
+| K      | Kalman Gain (how much to trust sensor vs prediction) |
 
-Predict the next state and its uncertainty:
+## 5. Kalman Filter Steps
 
-$$
-\mathbf{x}_{\text{pred}} = \mathbf{A} \mathbf{x}
-$$
+### 5.1 Prediction
 
-$$
-\mathbf{P}_{\text{pred}} = \mathbf{A} \mathbf{P} \mathbf{A}^\top + \mathbf{Q}
-$$
-
-Since $\mathbf{A} = \mathbf{I}_3$, it simplifies to:
-
-$$
-\mathbf{x}_{\text{pred}} = \mathbf{x}
-$$
-
-$$
-\mathbf{P}_{\text{pred}} = \mathbf{P} + \mathbf{Q}
-$$
-
-### (B) Update Step
-
-Correct using the new measurement ($\mathbf{z}$).
-
-**Compute Kalman Gain** ($\mathbf{K}$):
-
-$$
-\mathbf{K} = \mathbf{P}_{\text{pred}} \left( \mathbf{P}_{\text{pred}} + \mathbf{R} \right)^{-1}
-$$
-
-**Update the estimate**:
-
-$$
-\mathbf{x}_{\text{new}} = \mathbf{x}_{\text{pred}} + \mathbf{K} \left( \mathbf{z} - \mathbf{x}_{\text{pred}} \right)
-$$
-
-**Update the covariance**:
-
-$$
-\mathbf{P}_{\text{new}} = \left( \mathbf{I} - \mathbf{K} \right) \mathbf{P}_{\text{pred}}
-$$
-
-
-## 3. Matrix Sizes
-
-| Symbol | Size        | Meaning                    |
-|--------|-------------|-----------------------------|
-| $\mathbf{x}$ | 3×1 | State (x, y, z)             |
-| $\mathbf{P}$ | 3×3 | State covariance            |
-| $\mathbf{A}$ | 3×3 | State transition matrix (Identity) |
-| $\mathbf{H}$ | 3×3 | Measurement matrix (Identity) |
-| $\mathbf{Q}$ | 3×3 | Process noise covariance    |
-| $\mathbf{R}$ | 3×3 | Measurement noise covariance |
-| $\mathbf{K}$ | 3×3 | Kalman gain matrix           |
-
----
-
-### 4. Kalman Filter Flowchart
-
+```math
+x' = F * x + B * u
 ```
-Previous State (x, P)
-       ↓
-  Prediction Step
-       ↓
-New Measurement (z)
-       ↓
-   Kalman Gain (K)
-       ↓
-Update Estimate (x, P)
+```math
+P' = F * P * Fᵀ + Q
 ```
 
----
+- `x'` is the predicted state.
+- `P'` is the predicted uncertainty.
 
-### 5. Important Notes
+### 5.2 Update (Correction)
 
-- In this simple setup, the **state transition** assumes the system stays constant unless updated by measurements.
-- The **process noise** ( \( \mathbf{Q} \) ) allows for small random changes.
-- The **measurement noise** ( \( \mathbf{R} \) ) models sensor uncertainty.
-- Extending this to **full IMU** filtering (position, velocity, orientation) would require a more complex \( \mathbf{A} \) and \( \mathbf{H} \) matrices.
+```math
+K = P' * Hᵀ * (H * P' * Hᵀ + R)⁻¹
+```
+```math
+x = x' + K * (z - H * x')
+```
+```math
+P = (I - K * H) * P'
+```
 
----
+- `K` is the Kalman Gain.
+- `z - H * x'` is the **innovation** (measurement residual).
+
+## 6. IMU Example: Angular Velocity and Linear Acceleration
+
+Suppose you have an IMU measuring:
+- `ω` (angular velocity in rad/s)
+- `a` (linear acceleration in m/s²)
+
+You want to estimate:
+- **Orientation** (angle)
+- **Velocity**
+
+### Define State
+
+```math
+x = [θ, v]ᵀ
+```
+
+where:
+- θ = angle (from integrating angular velocity)
+- v = velocity (from integrating acceleration)
+
+### Measurement
+
+```math
+z = [ω^{measured}, a^{measured}]^T
+```
+
+### State Transition Model (F)
+
+Assume constant velocity/angular velocity over small dt:
+
+$$
+H = \begin{bmatrix}
+1 & dt \\
+0 & 1
+\end{bmatrix}
+$$
 
 
+### Control Input (u)
+
+If external forces (optional):
+
+```math
+u = [0, 0]^T
+```
+
+### Measurement Model (H)
+
+Since IMU gives direct measurements of angular velocity and acceleration:
+
+$$
+H = \begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+$$
+
+### Process Noise Covariance (Q)
+
+Models uncertainty in dynamics (e.g., slight modeling errors):
+
+$$
+\mathbf{Q} = \text{small constant matrix}
+$$
+
+### Measurement Noise Covariance (R)
+
+Models sensor noise:
+
+$$
+\mathbf{R} = \text{based on sensor spec (e.g., standard deviation²)}
+$$
+
+## 7. Full Algorithm with IMU
+
+At every time step:
+1. **Predict**
+    - Predict θ and v based on last estimates.
+2. **Update**
+    - Use new IMU measurements (ω, a) to correct estimates.
+
+## 8. Advanced Topics
+
+### 8.1 Tuning R and Q
+- If R is too small → filter trusts sensors too much (noisy output).
+- If Q is too big → filter thinks motion model is bad (overreacts to sensor).
+
+You have to **tune** R and Q to get good performance!
+
+### 8.2 Nonlinear Systems
+When F or H is nonlinear, you need:
+- **Extended Kalman Filter (EKF)** — linearizes around current estimate.
+- **Unscented Kalman Filter (UKF)** — better but more complex.
+
+IMU data often requires EKF because real motion is slightly nonlinear.
+
+### 8.3 Sensor Fusion
+If you add GPS or Magnetometer data, you can extend the Kalman Filter to fuse them with the IMU.
+
+## 9. Visualization
+
+- **Prediction** moves the estimate according to the model.
+- **Correction** pulls it back towards the measurement.
+
+Imagine walking blindfolded with a GPS that buzzes when you're off-course, you "predict" your next step and "correct" based on the buzz!
