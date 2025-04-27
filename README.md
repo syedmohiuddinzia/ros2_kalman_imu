@@ -1,78 +1,99 @@
 # ros2_kalman_imu
 Implementation of Kalman Filter on MPU9250 IMU Linear Acceleration and Angular Velocity Data using ROS2
 
-## Mathematics Behind 3D Kalman Filter
+## 📚 Mathematics Behind 3D Kalman Filter
 
 ## 1. Definitions
 
 We are filtering a 3D state:
 
-- **State vector** ( \( \mathbf{x} \) ):
-  \[ \mathbf{x} = \begin{bmatrix} x \\ y \\ z \end{bmatrix} \]
+- **State vector** ($\mathbf{x}$):
 
-- **Measurement vector** ( \( \mathbf{z} \) ):
-  \[ \mathbf{z} = \begin{bmatrix} z_x \\ z_y \\ z_z \end{bmatrix} \]
+$$
+\mathbf{x} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}
+$$
 
-- **State covariance** ( \( \mathbf{P} \) ) (3×3 matrix):  
+- **Measurement vector** ($\mathbf{z}$):
+
+$$
+\mathbf{z} = \begin{bmatrix} z_x \\ z_y \\ z_z \end{bmatrix}
+$$
+
+- **State covariance** ($\mathbf{P}$) (3×3 matrix):  
   Represents the uncertainty in the estimate.
 
-- **Process noise covariance** ( \( \mathbf{Q} \) ) (3×3 matrix):  
+- **Process noise covariance** ($\mathbf{Q}$) (3×3 matrix):  
   Represents system disturbances.
 
-- **Measurement noise covariance** ( \( \mathbf{R} \) ) (3×3 matrix):  
+- **Measurement noise covariance** ($\mathbf{R}$) (3×3 matrix):  
   Represents sensor noise.
 
-- **Transition matrix** ( \( \mathbf{A} \) ) and **Observation matrix** ( \( \mathbf{H} \) ):  
-  Here both are identity matrices ( \( \mathbf{I}_3 \) ).
+- **Transition matrix** ($\mathbf{A}$) and **Observation matrix** ($\mathbf{H}$):  
+  Here both are identity matrices ($\mathbf{I}_3$).
 
 ---
 
-### 2. Kalman Filter Steps
+## 2. Kalman Filter Steps
 
-#### (A) Prediction Step
+### (A) Prediction Step
 
 Predict the next state and its uncertainty:
 
-\[ \mathbf{x}_{\text{pred}} = \mathbf{A} \mathbf{x} \]
+$$
+\mathbf{x}_{\text{pred}} = \mathbf{A} \mathbf{x}
+$$
 
-\[ \mathbf{P}_{\text{pred}} = \mathbf{A} \mathbf{P} \mathbf{A}^\top + \mathbf{Q} \]
+$$
+\mathbf{P}_{\text{pred}} = \mathbf{A} \mathbf{P} \mathbf{A}^\top + \mathbf{Q}
+$$
 
-Since \( \mathbf{A} = \mathbf{I}_3 \), it simplifies to:
+Since $\mathbf{A} = \mathbf{I}_3$, it simplifies to:
 
-\[ \mathbf{x}_{\text{pred}} = \mathbf{x} \]
-\[ \mathbf{P}_{\text{pred}} = \mathbf{P} + \mathbf{Q} \]
+$$
+\mathbf{x}_{\text{pred}} = \mathbf{x}
+$$
+
+$$
+\mathbf{P}_{\text{pred}} = \mathbf{P} + \mathbf{Q}
+$$
 
 ---
 
-#### (B) Update Step
+### (B) Update Step
 
-Correct using the new measurement ( \( \mathbf{z} \) ).
+Correct using the new measurement ($\mathbf{z}$).
 
-1. **Compute Kalman Gain** ( \( \mathbf{K} \) ):
+1. **Compute Kalman Gain** ($\mathbf{K}$):
 
-\[ \mathbf{K} = \mathbf{P}_{\text{pred}} \left( \mathbf{P}_{\text{pred}} + \mathbf{R} \right)^{-1} \]
+$$
+\mathbf{K} = \mathbf{P}_{\text{pred}} \left( \mathbf{P}_{\text{pred}} + \mathbf{R} \right)^{-1}
+$$
 
 2. **Update the estimate**:
 
-\[ \mathbf{x}_{\text{new}} = \mathbf{x}_{\text{pred}} + \mathbf{K} \left( \mathbf{z} - \mathbf{x}_{\text{pred}} \right) \]
+$$
+\mathbf{x}_{\text{new}} = \mathbf{x}_{\text{pred}} + \mathbf{K} \left( \mathbf{z} - \mathbf{x}_{\text{pred}} \right)
+$$
 
 3. **Update the covariance**:
 
-\[ \mathbf{P}_{\text{new}} = \left( \mathbf{I} - \mathbf{K} \right) \mathbf{P}_{\text{pred}} \]
+$$
+\mathbf{P}_{\text{new}} = \left( \mathbf{I} - \mathbf{K} \right) \mathbf{P}_{\text{pred}}
+$$
 
 ---
 
-### 3. Matrix Sizes
+## 3. Matrix Sizes
 
 | Symbol | Size        | Meaning                    |
 |--------|-------------|-----------------------------|
-| \( \mathbf{x} \) | 3×1 | State (x, y, z)             |
-| \( \mathbf{P} \) | 3×3 | State covariance            |
-| \( \mathbf{A} \) | 3×3 | State transition matrix (Identity) |
-| \( \mathbf{H} \) | 3×3 | Measurement matrix (Identity) |
-| \( \mathbf{Q} \) | 3×3 | Process noise covariance    |
-| \( \mathbf{R} \) | 3×3 | Measurement noise covariance |
-| \( \mathbf{K} \) | 3×3 | Kalman gain matrix           |
+| $\mathbf{x}$ | 3×1 | State (x, y, z)             |
+| $\mathbf{P}$ | 3×3 | State covariance            |
+| $\mathbf{A}$ | 3×3 | State transition matrix (Identity) |
+| $\mathbf{H}$ | 3×3 | Measurement matrix (Identity) |
+| $\mathbf{Q}$ | 3×3 | Process noise covariance    |
+| $\mathbf{R}$ | 3×3 | Measurement noise covariance |
+| $\mathbf{K}$ | 3×3 | Kalman gain matrix           |
 
 ---
 
