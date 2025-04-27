@@ -147,7 +147,7 @@ kf_.update(measurement, H);  // H = Identity matrix
 
 ### Tuning Process
 
-- Start with ```Q = 0.1 * I₆, R = 1.0 * I₆
+- Start with ```Q = 0.1 * I₆, R = 1.0 * I₆```
 - Record sensor data during typical operation
 - Adjust diagonals based on:
     - Sensor noise characteristics (see datasheet)
