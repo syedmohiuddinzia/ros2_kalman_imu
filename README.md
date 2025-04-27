@@ -59,23 +59,24 @@ $$
 
 Correct using the new measurement ($\mathbf{z}$).
 
-1. **Compute Kalman Gain** ($\mathbf{K}$):
+**Compute Kalman Gain** ($\mathbf{K}$):
 
 $$
 \mathbf{K} = \mathbf{P}_{\text{pred}} \left( \mathbf{P}_{\text{pred}} + \mathbf{R} \right)^{-1}
 $$
 
-2. **Update the estimate**:
+**Update the estimate**:
 
 $$
 \mathbf{x}_{\text{new}} = \mathbf{x}_{\text{pred}} + \mathbf{K} \left( \mathbf{z} - \mathbf{x}_{\text{pred}} \right)
 $$
 
-3. **Update the covariance**:
+**Update the covariance**:
 
 $$
 \mathbf{P}_{\text{new}} = \left( \mathbf{I} - \mathbf{K} \right) \mathbf{P}_{\text{pred}}
 $$
+
 
 ## 3. Matrix Sizes
 
