@@ -1,6 +1,10 @@
 # ros2_kalman_imu
 Implementation of Kalman Filter on MPU9250 IMU Linear Acceleration and Angular Velocity Data using ROS2
 
+## 0. Run ROS2 IMU
+Before proceeding to run any this node, ensure that the IMU data from your ESP32 device with an MPU sensor is properly integrated into your ROS 2 system. The step zero is to prepare and run the [https://github.com/syedmohiuddinzia/ros2_imu](https://github.com/syedmohiuddinzia/ros2_imu).
+``````
+
 ## 1. Prerequisites
 - ROS 2 installed (e.g., Humble, Foxy, Iron)
 - colcon build tool installed
