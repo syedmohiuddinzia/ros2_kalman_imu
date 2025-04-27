@@ -3,7 +3,6 @@ Implementation of Kalman Filter on MPU9250 IMU Linear Acceleration and Angular V
 
 ## 0. Run ROS2 IMU
 Before proceeding to run any this node, ensure that the IMU data from your ESP32 device with an MPU sensor is properly integrated into your ROS 2 system. The step zero is to prepare and run the [https://github.com/syedmohiuddinzia/ros2_imu](https://github.com/syedmohiuddinzia/ros2_imu).
-``````
 
 ## 1. Prerequisites
 - ROS 2 installed (e.g., Humble, Foxy, Iron)
@@ -33,21 +32,36 @@ Replace <ros2_distro> with your ROS 2 version (e.g., humble, foxy).
 ```bash
 source install/setup.bash
 ```
+```bash
+source ~/ros2_ws/install/setup.bash
+```
 (Optional: Add it to your ~/.bashrc.)
 
 ## 6. Run the IMU Kalman Filter Node
 ```bash
 ros2 run imu_kalman_filter imu_kalman_filter_node
 ```
+![img1]()
+Now run in another terminal ```ros2 topic list``` to see if **/imu/filtered** topics are available
+![img2]()
+And now run ```ros2 topic echo /imu/filtered``` to check if the data is available.
+![img3]()
+Now in another terminal run **rqt** to plot graphs between **imu/data** and **imu/filtered**. Therefore add topics ```imu/data/linear_acceleration``` and ```imu/filtered/linear_acceleration``` to differentiate between them.
+![img4]()
+
 ## 7. Run the IMU Visualizer Node
 In another terminal:
 ```bash
-source ~/ros2_ws/install/setup.bash
-```
-(Optional: Add it to your ~/.bashrc.)
-```bash
 ros2 run imu_kalman_filter imu_visualizer_node
 ```
+After running this node open **rviz2**
+```
+rviz2
+```
+Add **Imu** for **imu/data** and **imu/filtered** and add **Marker** </br>
+Now move IMU to see the movements in rviz2.
+![img5]()
+
 ## Notes
 
 - Ensure your IMU is publishing data to /imu/data
