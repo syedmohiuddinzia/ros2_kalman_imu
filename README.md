@@ -31,8 +31,6 @@ $$
 - **Transition matrix** ($\mathbf{A}$) and **Observation matrix** ($\mathbf{H}$):  
   Here both are identity matrices ($\mathbf{I}_3$).
 
----
-
 ## 2. Kalman Filter Steps
 
 ### (A) Prediction Step
@@ -57,8 +55,6 @@ $$
 \mathbf{P}_{\text{pred}} = \mathbf{P} + \mathbf{Q}
 $$
 
----
-
 ### (B) Update Step
 
 Correct using the new measurement ($\mathbf{z}$).
@@ -80,8 +76,6 @@ $$
 $$
 \mathbf{P}_{\text{new}} = \left( \mathbf{I} - \mathbf{K} \right) \mathbf{P}_{\text{pred}}
 $$
-
----
 
 ## 3. Matrix Sizes
 
