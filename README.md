@@ -1,6 +1,56 @@
 # ros2_kalman_imu
 Implementation of Kalman Filter on MPU9250 IMU Linear Acceleration and Angular Velocity Data using ROS2
 
+## 1. Prerequisites
+- ROS 2 installed (e.g., Humble, Foxy, Iron)
+- colcon build tool installed
+- Git installed
+
+## 2. Create a ROS 2 Workspace
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws
+```
+## 3. Clone the Repository
+```bash
+cd ~/ros2_ws/src
+git clone https://github.com/<your_github_username>/imu_kalman_filter.git
+```
+
+## 4. Build the Workspace
+```bash
+cd ~/ros2_ws
+source /opt/ros/<ros2_distro>/setup.bash
+colcon build --packages-select imu_kalman_filter
+```
+Replace <ros2_distro> with your ROS 2 version (e.g., humble, foxy).
+
+## 5. Source the Workspace
+```bash
+source install/setup.bash
+```
+(Optional: Add it to your ~/.bashrc.)
+
+## 6. Run the IMU Kalman Filter Node
+```bash
+ros2 run imu_kalman_filter imu_kalman_filter_node
+```
+## 7. Run the IMU Visualizer Node
+In another terminal:
+```bash
+source ~/ros2_ws/install/setup.bash
+```
+(Optional: Add it to your ~/.bashrc.)
+```bash
+ros2 run imu_kalman_filter imu_visualizer_node
+```
+## Notes
+
+- Ensure your IMU is publishing data to /imu/data
+- Visualize the /imu/filtered topic in RViz2 or by echoing:
+- ros2 topic echo /imu/filtered
+- Check serial permissions if using a USB IMU device.
+
 ## 1. Introduction
 
 The **Kalman Filter** is an algorithm that estimates the true state of a system from noisy sensor measurements.  
